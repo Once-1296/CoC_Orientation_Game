@@ -19,6 +19,7 @@ This README describes the game as it is now. For the original design, see `IDEA.
 - [Project structure](#project-structure)
 - [Assets](#assets)
 - [Tools](#tools)
+- [Tests](#tests)
 - [Current limitations](#current-limitations)
 
 ## Setup and running
@@ -188,6 +189,7 @@ game/
     snowball.py            Snowball Fight
 tools/
   resize_assets.py         Pillow script: scales images to 32×32
+tests/                     pytest suite (see Tests)
 ```
 
 Each mini game keeps its tuning values as class constants. The difficulty presets override them
@@ -220,11 +222,30 @@ python tools/resize_assets.py             # resize in place
   are fitted and centred on a transparent canvas, and pixel art stays sharp. The files are
   overwritten, so run it with `--dry-run` first.
 
+## Tests
+
+The tests use pytest and run headless (no window or sound device needed).
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
+The suite lives in `tests/`:
+
+| File | Covers |
+|---|---|
+| `test_world.py` | Map exits and arrivals, reachability of every walkable tile, random walks that must never enter walls or leave the map, slimes staying inside |
+| `test_movement.py` | Corner sliding, facing and the sprite flip, moving to the nearest free spot |
+| `test_combat.py` | Sword hits per upgrade level, shield blocks, half-heart contact damage, pickups |
+| `test_minigames.py` | Win and loss rules for all four mini games, Shift steering, fish weights, the F shortcuts |
+| `test_progression.py` | Quests and difficulty menus, rewards and replays, retries, respawn, shop purchases and caps, potions, hearts, inventory |
+
+`tests/conftest.py` sets the dummy video and audio drivers and seeds the random number generator,
+so results repeat from run to run.
+
 ## Current limitations
 
 - **No saving.** Progress lasts only while the game is running.
 - **No selling.** The Merchant only sells. Fish, rocks, and snow can't be sold yet.
 - **Placeholder art** for the house door and the market stall. The snow pickup is a plain white circle.
-- **Balance is untested by players.** The mini game numbers are first guesses.
-- **No automated tests in the repository.** Testing has been done by scripts, and they are not
-  committed yet.
