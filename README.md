@@ -29,9 +29,19 @@ DEBUG_ASSETS=1 python main.py
 |---|---|
 | Arrow keys / WASD | Move |
 | E / Space / Enter | Talk, use shop, advance dialogue |
-| Esc | Quit |
+| J | Sword swing |
+| K / X (hold) | Shield. Blocks hits from the front. Slows movement. |
+| Shift + arrow (fishing) | Keep the line tight: match the yellow arrow |
+| Esc | Quit (or leave a mini game / menu) |
 
 ## Assets
 
-Art and sound are placeholders for now. See [ASSET_SOURCES.md](ASSET_SOURCES.md) for
-where to find free assets and how to swap them in.
+Art and sound live in `assets/images/` and `assets/sounds/`. Missing files fall back to
+placeholders. See [ASSET_SOURCES.md](ASSET_SOURCES.md) for what is still needed.
+
+To make every image 32×32 (uses Pillow, installed by `requirements.txt`):
+
+```bash
+python tools/resize_assets.py --dry-run   # preview
+python tools/resize_assets.py             # resize in place
+```

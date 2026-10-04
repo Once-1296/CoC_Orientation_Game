@@ -1,3 +1,8 @@
 .venv/
 __pycache__/
 *.pyc
+
+# Ignore everything in assets/ except the folders the game uses
+assets/*
+!assets/images/
+!assets/sounds/

@@ -1,3 +1,4 @@
+import glob
 import os
 
 import pygame
@@ -29,11 +30,13 @@ PLACEHOLDER_COLORS = {
     "player_right": (60, 120, 220),
     "dialogue_box": (20, 20, 30),
     "icon_coin": (230, 190, 40),
+    "boat": (150, 100, 60),
 }
 NPC_COLOR = (200, 160, 60)
 UNKNOWN_COLOR = (200, 0, 200)
 
 _images = {}
+_frame_cache = {}
 _missing = set()
 _fonts = {}
 
@@ -64,8 +67,36 @@ def image(name, size=None):
     return surf
 
 
+def frames(folder, flip=False, size=None):
+    """Return every PNG in images/<folder>, sorted by name, for animation.
+
+    `folder` is relative to assets/images, for example "player/FrontWalk".
+    """
+    size = size or (S.TILE_SIZE, S.TILE_SIZE)
+    key = (folder, flip, size)
+    if key in _frame_cache:
+        return _frame_cache[key]
+
+    paths = sorted(glob.glob(os.path.join(IMAGE_DIR, folder, "*.png")))
+    if not paths:
+        _missing.add(folder)
+        result = [_placeholder(folder.replace("/", "_"), size)]
+    else:
+        result = []
+        for path in paths:
+            surf = pygame.image.load(path).convert_alpha()
+            if surf.get_size() != size:
+                surf = pygame.transform.scale(surf, size)
+            if flip:
+                surf = pygame.transform.flip(surf, True, False)
+            result.append(surf)
+
+    _frame_cache[key] = result
+    return result
+
+
 def _placeholder(name, size):
-    if name.startswith("npc_"):
+    if name.startswith("npc"):
         color = NPC_COLOR
     else:
         color = PLACEHOLDER_COLORS.get(name, UNKNOWN_COLOR)
@@ -94,6 +125,58 @@ def sound(name):
         return pygame.mixer.Sound(path)
     except pygame.error:
         return None
+
+
+HEALTH_SHEET = os.path.join(IMAGE_DIR, "ui", "Heart_Health_Bar.png")
+HEART_SCALE = 3
+# Pixel positions of single hearts in the sheet: the first column of row 0 is full, row 5 is half, row 6 is empty.
+HEART_CROPS = {2: (0, 0), 1: (0, 40), 0: (0, 48)}
+_heart_cache = {}
+
+
+def heart(value):
+    """A single heart: 2 = full, 1 = half, 0 = empty (one value per half-heart)."""
+    if value not in _heart_cache:
+        size = (8 * HEART_SCALE, 8 * HEART_SCALE)
+        if os.path.exists(HEALTH_SHEET):
+            sheet = pygame.image.load(HEALTH_SHEET).convert_alpha()
+            x, y = HEART_CROPS[value]
+            img = sheet.subsurface(pygame.Rect(x, y, 8, 8)).copy()
+            img = pygame.transform.scale(img, size)
+        else:
+            _missing.add("ui/Heart_Health_Bar")
+            img = pygame.Surface(size)
+            img.fill((220, 40, 50) if value else (70, 70, 80))
+        _heart_cache[value] = img
+    return _heart_cache[value]
+
+
+_sound_cache = {}
+
+
+def play(name, volume=1.0):
+    """Play a sound effect by name. Does nothing if the file or audio device is missing."""
+    if name not in _sound_cache:
+        _sound_cache[name] = sound(name)
+    snd = _sound_cache[name]
+    if snd:
+        snd.set_volume(volume)
+        snd.play()
+
+
+def play_music(name, volume=0.5):
+    """Loop a music track by name. Streams from disk, so use it for long tracks."""
+    for ext in (".ogg", ".wav", ".mp3"):
+        path = os.path.join(SOUND_DIR, name + ext)
+        if os.path.exists(path):
+            try:
+                pygame.mixer.music.load(path)
+                pygame.mixer.music.set_volume(volume)
+                pygame.mixer.music.play(-1)
+            except pygame.error:
+                pass
+            return
+    _missing.add(name)
 
 
 def report_missing():
