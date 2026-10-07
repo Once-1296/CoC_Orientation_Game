@@ -17,6 +17,7 @@ This README describes the game as it is now. For the original design, see `IDEA.
 - [Shop, potions and upgrades](#shop-potions-and-upgrades)
 - [Inventory](#inventory)
 - [Project structure](#project-structure)
+- [Architecture](#architecture)
 - [Assets](#assets)
 - [Tools](#tools)
 - [Tests](#tests)
@@ -190,10 +191,17 @@ game/
 tools/
   resize_assets.py         Pillow script: scales images to 32×32
 tests/                     pytest suite (see Tests)
+docs/
+  architecture.svg         diagram: startup, the main loop, and three walk-throughs
+  ARCHITECTURE.md          the same walk-throughs written out, plus design notes
 ```
 
 Each mini game keeps its tuning values as class constants. The difficulty presets override them
 for each run.
+
+## Architecture
+
+For how the modules fit together and how a frame of play actually flows — from startup through to an enemy collision, a mini game, and a shop purchase — see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and the diagram it's built around, [docs/architecture.svg](docs/architecture.svg).
 
 ## Assets
 
