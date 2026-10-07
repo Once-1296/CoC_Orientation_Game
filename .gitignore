@@ -6,9 +6,6 @@ build/
 dist/
 *.spec
 
-build/
-dist/
-*.spec
 # Ignore everything in assets/ except the folders the game uses
 assets/*
 !assets/images/
